@@ -1,202 +1,122 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head>
-  <meta charset="utf-8" />
-  <title>✨ Полка Чудес ✨</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2a49c4">
-
-  <link rel="shortcut icon" href="assets/icon.png" type="image/png">
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: url("assets/bg.png") repeat;
-      display: flex;
-      justify-content: center;
-      color: #000;
-    }
-
-    .page {
-      width: 100%;
-      max-width: 640px;  /* фиксируем ширину под canvas */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-
-    .site-title {
-      font-family: 'Poppins', sans-serif;
-      font-size: 2.8rem;
-      color: #ffffff;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-      margin: 12px 0;
-      text-align: center;
-    }
-
-    .game-wrapper {
-      width: 100%;
-      background: #f0f0f0;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    #unity-container {
-      width: 100%;
-      position: relative;
-      background: #f0f0f0;
-    }
-
-    #unity-canvas {
-      width: 100% !important;
-      height: auto !important;
-      background: #000;
-      display: block;
-    }
-
-    .fullscreen-button {
-      margin: 12px auto 18px auto;
-      display: block;
-      padding: 12px 18px;
-      border: none;
-      border-radius: 4px;
-      background: #2a49c4;
-      color: #ffffff;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .fullscreen-button:active {
-      transform: scale(0.98);
-    }
-    #unity-fullscreen-button {
-      display: none !important;
-    }
-
-    .footer-link {
-      margin-top: 24px;
-      font-size: 1rem;
-      color: #444;
-      text-decoration: none;
-    }
-    .footer-link:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="page">
-    <div class="site-title">✨ Полка Чудес ✨</div>
-
-    <div class="game-wrapper">
-      <div id="unity-container" class="unity-desktop">
-        <canvas id="unity-canvas" width="640" height="960" tabindex="-1"></canvas>
-
-        <div id="unity-loading-bar">
-          <div id="unity-logo"></div>
-          <div id="unity-progress-bar-empty">
-            <div id="unity-progress-bar-full"></div>
-          </div>
-        </div>
-
-        <div id="unity-warning"></div>
-
-        <div id="unity-footer">
-          <div id="unity-webgl-logo"></div>
-          <div id="unity-fullscreen-button"></div>
-          <div id="unity-build-title">Полка Чудес</div>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Полка Чудес</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=640 height=960 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
         </div>
       </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">Полка Чудес</div>
+      </div>
     </div>
+    <script>
 
-    <button id="fullscreen-btn" class="fullscreen-button">Во весь экран</button>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
 
-    <a href="https://t.me/polkachudes" class="footer-link" target="_blank" rel="noopener">
-      Наш Telegram-канал 🧷
-    </a>
-  </div>
-
-  <script>
-    var container = document.querySelector("#unity-container");
-    var canvas = document.querySelector("#unity-canvas");
-    var loadingBar = document.querySelector("#unity-loading-bar");
-    var progressBarFull = document.querySelector("#unity-progress-bar-full");
-    var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-    var warningBanner = document.querySelector("#unity-warning");
-
-    function unityShowBanner(msg, type) {
-      function updateBannerVisibility() {
-        warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
       }
-      var div = document.createElement('div');
-      div.innerHTML = msg;
-      warningBanner.appendChild(div);
-      if (type == 'error') div.style = 'background: red; padding: 10px;';
-      else {
-        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-        setTimeout(function() {
-          warningBanner.removeChild(div);
-          updateBannerVisibility();
-        }, 5000);
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/polkaGameNew.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/polkaGameNew.data.unityweb",
+        frameworkUrl: buildUrl + "/polkaGameNew.framework.js.unityweb",
+        codeUrl: buildUrl + "/polkaGameNew.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Relisqu",
+        productName: "Полка Чудес",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "640px";
+        canvas.style.height = "960px";
       }
-      updateBannerVisibility();
-    }
 
-    var buildUrl = "Build";
-    var loaderUrl = buildUrl + "/polkaGameNew.loader.js";
-    var config = {
-      dataUrl: buildUrl + "/polkaGameNew.data.unityweb",
-      frameworkUrl: buildUrl + "/polkaGameNew.framework.js.unityweb",
-      codeUrl: buildUrl + "/polkaGameNew.wasm.unityweb",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "Relisqu",
-      productName: "Полка Чудес",
-      productVersion: "1.0",
-      showBanner: unityShowBanner
-    };
+      loadingBar.style.display = "block";
 
-    // Для мобильных: не меняем размеры, пусть Unity рендерит 640×960, браузер уменьшит по ширине
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      container.className = "unity-mobile";
-      canvas.className = "unity-mobile";
-      // config.devicePixelRatio = 1; // при необходимости можно добавить
-    }
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
 
-    loadingBar.style.display = "block";
+      document.body.appendChild(script);
 
-    var script = document.createElement("script");
-    script.src = loaderUrl;
-    script.onload = function() {
-      createUnityInstance(canvas, config, function(progress) {
-        progressBarFull.style.width = 100 * progress + "%";
-      }).then(function(unityInstance) {
-        loadingBar.style.display = "none";
-        fullscreenButton.onclick = function() {
-          unityInstance.SetFullscreen(1);
-        };
-      }).catch(function(message) {
-        alert(message);
-      });
-    };
-    document.body.appendChild(script);
-  </script>
-</body>
+    </script>
+  </body>
 </html>
